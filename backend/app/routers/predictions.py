@@ -98,6 +98,18 @@ def _run_forecast(medicine_id: int, horizon: int, db: Session) -> ForecastSummar
     )
 
 
+@router.get("/forecast/{medicine_id}", response_model=ForecastSummary)
+def forecast_medicine(
+    medicine_id: int,
+    horizon: int = Query(30),
+    db: Session = Depends(get_db),
+):
+    """Run a demand forecast for a single medicine."""
+    if horizon not in settings.FORECAST_HORIZONS:
+        raise HTTPException(status_code=400, detail=f"horizon must be one of {settings.FORECAST_HORIZONS}")
+    return _run_forecast(medicine_id, horizon, db)
+
+
 @router.get("/forecast/all/summary")
 def forecast_all(
     horizon: int = Query(30),
