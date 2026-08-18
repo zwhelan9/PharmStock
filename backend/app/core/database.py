@@ -36,5 +36,9 @@ def get_db():
 def init_db():
     """Create all tables. Called on app startup."""
     # Import all models so SQLAlchemy knows about them before create_all
-    from app.models import Medicine, Batch, StockLog, Sale, ExpiryLog, Prediction, User  # noqa: F401
+    from app.models import (  # noqa: F401
+        Medicine, Batch, StockLog, Sale, ExpiryLog, Prediction, User,
+        PackInstance, DispenseTransaction, DispenseLineItem, WriteOff,
+        ReconciliationAdjustment, CDRegisterEntry, DutyRegisterEntry, CDDestructionRecord,
+    )
     Base.metadata.create_all(bind=engine)

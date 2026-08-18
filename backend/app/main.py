@@ -5,7 +5,11 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import init_db
 from app.core.security import get_current_user
-from app.routers import medicines, batches, sales, stock, expiry, predictions, alerts, auth
+from app.routers import (
+    medicines, batches, sales, stock, expiry, predictions, alerts, auth,
+    packs, dispense, writeoffs, touchstore, reorder, risk,
+    cd_register, duty_register, cd_destruction, cd_anomalies,
+)
 
 
 @asynccontextmanager
@@ -47,6 +51,16 @@ app.include_router(stock.router,       prefix="/api/v1", **_protected)
 app.include_router(expiry.router,      prefix="/api/v1", **_protected)
 app.include_router(predictions.router, prefix="/api/v1", **_protected)
 app.include_router(alerts.router,      prefix="/api/v1", **_protected)
+app.include_router(packs.router,       prefix="/api/v1", **_protected)
+app.include_router(dispense.router,    prefix="/api/v1", **_protected)
+app.include_router(writeoffs.router,   prefix="/api/v1", **_protected)
+app.include_router(touchstore.router,  prefix="/api/v1", **_protected)
+app.include_router(reorder.router,     prefix="/api/v1", **_protected)
+app.include_router(risk.router,        prefix="/api/v1", **_protected)
+app.include_router(cd_register.router,   prefix="/api/v1", **_protected)
+app.include_router(duty_register.router, prefix="/api/v1", **_protected)
+app.include_router(cd_destruction.router, prefix="/api/v1", **_protected)
+app.include_router(cd_anomalies.router,  prefix="/api/v1", **_protected)
 
 
 @app.get("/", tags=["Health"])

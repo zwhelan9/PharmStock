@@ -16,16 +16,30 @@ export default function Predictions() {
   const [forecast, setForecast]       = useState(null)
   const [horizon, setHorizon]         = useState(30)
   const [loading, setLoading]         = useState(true)
+  const [overviewLoading, setOverviewLoading] = useState(false)
+  const [overviewLoaded, setOverviewLoaded]   = useState(false)
   const [chartLoading, setChartLoading] = useState(false)
   const [error, setError]             = useState(null)
   const [tab, setTab]                 = useState('overview')  // overview | detail
 
+  // Only load medicines list on mount — fast
   useEffect(() => {
-    Promise.all([medicinesApi.list(), predictionsApi.reorderList(30)])
-      .then(([meds, rl]) => { setMedicines(meds); setReorderList(rl) })
+    medicinesApi.list()
+      .then(meds => setMedicines(meds))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
+
+  // Load reorder list lazily when overview tab is shown
+  useEffect(() => {
+    if (tab === 'overview' && !overviewLoaded) {
+      setOverviewLoading(true)
+      predictionsApi.reorderList(30)
+        .then(rl => { setReorderList(rl); setOverviewLoaded(true) })
+        .catch(e => setError(e.message))
+        .finally(() => setOverviewLoading(false))
+    }
+  }, [tab, overviewLoaded])
 
   const loadForecast = (medicineId, h = horizon) => {
     if (!medicineId) return
@@ -95,12 +109,16 @@ export default function Predictions() {
       {/* Overview Tab */}
       {tab === 'overview' && (
         <div className="space-y-4">
-          <div className="card p-4 bg-yellow-50 border border-yellow-200">
-            <p className="text-sm font-medium text-yellow-800">
-              ⚠️ {reorderList.length} medicine(s) require reordering based on 30-day demand forecast
-            </p>
-          </div>
-          <div className="card overflow-x-auto">
+          {overviewLoading ? (
+            <LoadingSpinner message="Running forecasts for all medicines… (first load may take ~10s)" />
+          ) : (
+            <>
+              <div className="card p-4 bg-yellow-50 border border-yellow-200">
+                <p className="text-sm font-medium text-yellow-800">
+                  ⚠️ {reorderList.length} medicine(s) require reordering based on 30-day demand forecast
+                </p>
+              </div>
+              <div className="card overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr>
@@ -142,6 +160,8 @@ export default function Predictions() {
               </tbody>
             </table>
           </div>
+            </>
+          )}
         </div>
       )}
 

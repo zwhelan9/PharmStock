@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     # Prediction horizon options
     FORECAST_HORIZONS: list[int] = [7, 14, 30]
 
+    # Pack / Write-Off settings
+    COUNTERSIGN_WINDOW_HOURS: int = 24
+    WRITEOFF_LOSS_RATE_THRESHOLD: float = 0.1
+    TOUCHSTORE_QTY_TOLERANCE: int = 0
+    PACK_EXPIRY_ALERT_DAYS: int = 90
+
     # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 

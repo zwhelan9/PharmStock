@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { expiryApi } from '../api/expiry'
+import { packsApi } from '../api/packs'
 import AlertBadge from '../components/AlertBadge'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
@@ -15,21 +16,24 @@ export default function ExpiryTracking() {
   const [alerts, setAlerts]     = useState(null)
   const [logs, setLogs]         = useState([])
   const [calendar, setCalendar] = useState({})
+  const [packAlerts, setPackAlerts] = useState([])
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState(null)
-  const [tab, setTab]           = useState('alerts')   // alerts | logs | calendar
+  const [tab, setTab]           = useState('alerts')   // alerts | packs | logs | calendar
 
   const load = async () => {
     setLoading(true)
     try {
-      const [a, l, c] = await Promise.all([
+      const [a, l, c, pa] = await Promise.all([
         expiryApi.alerts(),
         expiryApi.logs({ limit: 100 }),
         expiryApi.calendar(3),
+        packsApi.expiryAlerts().catch(() => []),
       ])
       setAlerts(a)
       setLogs(l)
       setCalendar(c)
+      setPackAlerts(pa)
     } catch (e) {
       setError(e.message)
     } finally {
@@ -41,6 +45,10 @@ export default function ExpiryTracking() {
 
   if (loading) return <LoadingSpinner message="Loading expiry data..." />
   if (error)   return <ErrorMessage message={error} onRetry={load} />
+
+  const today = new Date().toISOString().slice(0, 10)
+  const expiredPacks = packAlerts.filter(p => p.expiry_date <= today)
+  const approachingPacks = packAlerts.filter(p => p.expiry_date > today)
 
   return (
     <div className="space-y-4">
@@ -74,7 +82,7 @@ export default function ExpiryTracking() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-        {[['alerts', '🚨 Expiry Alerts'], ['logs', '📋 Expiry Logs'], ['calendar', '📅 Calendar']].map(([t, l]) => (
+        {[['alerts', '🚨 Batch Alerts'], ['packs', `📋 Pack Expiry (${packAlerts.length})`], ['logs', '📋 Logs'], ['calendar', '📅 Calendar']].map(([t, l]) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -87,7 +95,7 @@ export default function ExpiryTracking() {
         ))}
       </div>
 
-      {/* Alerts Tab */}
+      {/* Alerts Tab (batch-level, legacy) */}
       {tab === 'alerts' && (
         <div className="space-y-6">
           {Object.entries(TIER_CONFIG).map(([tier, cfg]) => {
@@ -140,6 +148,85 @@ export default function ExpiryTracking() {
               <p>No expiry alerts — all batches within acceptable dates</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Pack Expiry Tab */}
+      {tab === 'packs' && (
+        <div className="space-y-4">
+          {expiredPacks.length > 0 && (
+            <div className="card border border-red-200 bg-red-50">
+              <div className="px-5 py-3 border-b border-red-200">
+                <h3 className="font-semibold text-red-800">Expired Packs — Write-Off Required ({expiredPacks.length})</h3>
+              </div>
+              <table className="min-w-full divide-y divide-red-100">
+                <thead className="bg-red-50">
+                  <tr>
+                    {['Pack', 'Medicine', 'Batch #', 'Expiry', 'Remaining', 'Status'].map(h => (
+                      <th key={h} className="table-th text-red-700">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-red-50">
+                  {expiredPacks.map(p => (
+                    <tr key={p.id}>
+                      <td className="table-td text-xs">#{p.id}</td>
+                      <td className="table-td font-medium">{p.medicine_name}</td>
+                      <td className="table-td font-mono text-xs">{p.batch_number}</td>
+                      <td className="table-td text-red-600 font-semibold">{p.expiry_date}</td>
+                      <td className="table-td font-semibold">{p.quantity_remaining}</td>
+                      <td className="table-td"><span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{p.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="card overflow-x-auto">
+            <div className="px-5 py-3 border-b border-gray-100">
+              <h3 className="font-medium text-gray-700">Packs Approaching Expiry ({approachingPacks.length})</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Open packs are prioritised above sealed packs</p>
+            </div>
+            {!approachingPacks.length ? (
+              <p className="p-8 text-center text-gray-400">No packs approaching expiry within the alert window</p>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {['Pack', 'Medicine', 'Batch #', 'Expiry', 'Remaining', 'Status', 'Days Left'].map(h => (
+                      <th key={h} className="table-th">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {approachingPacks.map(p => {
+                    const daysLeft = Math.ceil((new Date(p.expiry_date) - new Date(today)) / 86400000)
+                    let badgeClass = 'bg-green-100 text-green-700'
+                    if (daysLeft <= 30) badgeClass = 'bg-red-100 text-red-700'
+                    else if (daysLeft <= 60) badgeClass = 'bg-orange-100 text-orange-700'
+                    else if (daysLeft <= 90) badgeClass = 'bg-yellow-100 text-yellow-700'
+
+                    return (
+                      <tr key={p.id} className="hover:bg-gray-50">
+                        <td className="table-td text-xs">#{p.id}</td>
+                        <td className="table-td font-medium">{p.medicine_name}</td>
+                        <td className="table-td font-mono text-xs">{p.batch_number}</td>
+                        <td className="table-td">{p.expiry_date}</td>
+                        <td className="table-td font-semibold">{p.quantity_remaining}</td>
+                        <td className="table-td">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === 'open' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{p.status}</span>
+                        </td>
+                        <td className="table-td">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeClass}`}>{daysLeft}d</span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       )}
 
