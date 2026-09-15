@@ -10,3 +10,4 @@ from .dispense_transaction import DispenseTransaction, DispenseLineItem, Dispens
 from .write_off import WriteOff, ReasonCode, WriteOffStatus
 from .reconciliation_adjustment import ReconciliationAdjustment
 from .cd_register import CDRegisterEntry, CDTransactionType, DutyRegisterEntry, DutyRole, CDDestructionRecord
+from .integration import ImportLog, StockSnapshot, QuarantinedRecord, DispenseEvent

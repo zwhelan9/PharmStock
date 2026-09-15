@@ -4,10 +4,28 @@ import { medicinesApi } from '../api/medicines'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 
-const statusBadge = {
-  sealed: 'bg-gray-100 text-gray-700',
-  open:   'bg-blue-100 text-blue-700',
-  empty:  'bg-gray-50 text-gray-400',
+const statusConfig = {
+  sealed: {
+    style: 'bg-gray-100 text-gray-700',
+    label: 'Sealed',
+    sublabel: 'Full pack, unopened',
+    icon: '📦',
+    tooltip: 'This pack has not been opened yet — every unit is still inside.',
+  },
+  open: {
+    style: 'bg-blue-100 text-blue-700',
+    label: 'Open',
+    sublabel: 'In use',
+    icon: '📂',
+    tooltip: 'This pack has been started and is being dispensed from. It gets used up before a new pack is opened.',
+  },
+  empty: {
+    style: 'bg-gray-50 text-gray-400',
+    label: 'Empty',
+    sublabel: 'Used up',
+    icon: '🕳️',
+    tooltip: 'All units from this pack have been dispensed.',
+  },
 }
 
 export default function PackInventory() {
@@ -81,9 +99,9 @@ export default function PackInventory() {
           </select>
           <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm" value={filter.status} onChange={e => setFilter(f => ({ ...f, status: e.target.value }))}>
             <option value="">All statuses</option>
-            <option value="sealed">Sealed</option>
-            <option value="open">Open</option>
-            <option value="empty">Empty</option>
+            <option value="sealed">Sealed (full pack)</option>
+            <option value="open">Open (in use)</option>
+            <option value="empty">Empty (used up)</option>
           </select>
         </div>
         <div className="flex gap-2">
@@ -92,12 +110,25 @@ export default function PackInventory() {
         </div>
       </div>
 
+      {/* Plain-language legend */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-600 bg-blue-50 border border-blue-100 rounded-lg px-4 py-2.5">
+        <span className="font-medium text-gray-700">Pack status:</span>
+        {Object.entries(statusConfig).map(([key, cfg]) => (
+          <span key={key} className="flex items-center gap-1.5">
+            <span>{cfg.icon}</span>
+            <span className={`px-1.5 py-0.5 rounded font-medium ${cfg.style}`}>{cfg.label}</span>
+            <span className="text-gray-400">— {cfg.sublabel}</span>
+          </span>
+        ))}
+        <span className="text-gray-400 italic ml-auto">Oldest / opened packs are always used first (FEFO)</span>
+      </div>
+
       {/* Pack table */}
       <div className="card overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-100">
           <thead className="bg-gray-50">
             <tr>
-              {['ID', 'Medicine', 'Batch #', 'Expiry', 'Received', 'Remaining', 'Status', 'Unit Cost', 'CD'].map(h => (
+              {['ID', 'Medicine', 'Batch #', 'Expiry', 'Received', 'Remaining', 'Status', 'Unit Cost', 'Controlled Drug'].map(h => (
                 <th key={h} className="table-th">{h}</th>
               ))}
             </tr>
@@ -112,10 +143,25 @@ export default function PackInventory() {
                 <td className="table-td">{p.quantity_received}</td>
                 <td className="table-td font-semibold">{p.quantity_remaining}</td>
                 <td className="table-td">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusBadge[p.status] || ''}`}>{p.status}</span>
+                  {(() => {
+                    const cfg = statusConfig[p.status] || {}
+                    return (
+                      <span
+                        title={cfg.tooltip}
+                        className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium cursor-help ${cfg.style || ''}`}
+                      >
+                        <span>{cfg.icon}</span>
+                        {cfg.label || p.status}
+                      </span>
+                    )
+                  })()}
                 </td>
                 <td className="table-td">{p.unit_cost != null ? `€${p.unit_cost.toFixed(2)}` : '—'}</td>
-                <td className="table-td">{p.is_controlled_drug ? '💊' : ''}</td>
+                <td className="table-td">
+                  {p.is_controlled_drug
+                    ? <span title="Controlled drug — subject to CD register rules" className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700 cursor-help">🔒 Yes</span>
+                    : <span className="text-xs text-gray-400">No</span>}
+                </td>
               </tr>
             ))}
             {!packs.length && (

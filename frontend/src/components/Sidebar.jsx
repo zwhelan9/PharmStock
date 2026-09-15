@@ -2,18 +2,15 @@ import { NavLink } from 'react-router-dom'
 import clsx from 'clsx'
 
 const nav = [
-  { to: '/dashboard',      label: 'Dashboard',        icon: '🏠' },
-  { to: '/medicines',      label: 'Medicines',         icon: '💊' },
-  { to: '/packs',          label: 'Pack Inventory',    icon: '📋' },
-  { to: '/stock',          label: 'Stock Management',  icon: '📦' },
-  { to: '/reorder',        label: 'Reorder',           icon: '🛒' },
-  { to: '/writeoffs',      label: 'Write-Offs',        icon: '🗑️' },
-  { to: '/expiry',         label: 'Expiry Tracking',   icon: '⏰' },
-  { to: '/predictions',    label: 'Predictions',       icon: '📈' },
-  { to: '/sales',          label: 'Sales History',     icon: '🧾' },
-  { to: '/cd-register',    label: 'CD Register',       icon: '🔒' },
-  { to: '/duty-register',  label: 'Duty Register',     icon: '👤' },
-  { to: '/cd-destruction', label: 'CD Destruction',    icon: '🔥' },
+  { to: '/dashboard',        label: 'Dashboard',           icon: '🏠' },
+  { to: '/medicines',        label: 'Medicines',           icon: '💊' },
+  { to: '/inventory',        label: 'Inventory',           icon: '📦' },
+  { to: '/sales',            label: 'Sales History',       icon: '🧾' },
+  { to: '/forecasting',      label: 'Forecasting & Reorder', icon: '📈' },
+  { to: '/writeoffs',        label: 'Write-Offs',          icon: '🗑️' },
+  { to: '/expiry',           label: 'Expiry Tracking',     icon: '⏰' },
+  { to: '/controlled-drugs', label: 'Controlled Drugs',    icon: '🔒' },
+  { to: '/data-import',      label: 'Data Import',         icon: '📥' },
 ]
 
 export default function Sidebar() {

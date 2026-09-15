@@ -40,5 +40,6 @@ def init_db():
         Medicine, Batch, StockLog, Sale, ExpiryLog, Prediction, User,
         PackInstance, DispenseTransaction, DispenseLineItem, WriteOff,
         ReconciliationAdjustment, CDRegisterEntry, DutyRegisterEntry, CDDestructionRecord,
+        ImportLog, StockSnapshot, QuarantinedRecord, DispenseEvent,
     )
     Base.metadata.create_all(bind=engine)

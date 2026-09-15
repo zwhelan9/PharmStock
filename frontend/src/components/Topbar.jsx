@@ -2,18 +2,15 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const titles = {
-  '/dashboard':      'Dashboard',
-  '/medicines':      'Medicines Catalogue',
-  '/stock':          'Stock Management',
-  '/packs':          'Pack Inventory',
-  '/reorder':        'Reorder Recommendations',
-  '/writeoffs':      'Write-Offs',
-  '/expiry':         'Expiry Tracking',
-  '/predictions':    'Demand Predictions',
-  '/sales':          'Sales History',
-  '/cd-register':    'Controlled Drugs Register',
-  '/duty-register':  'Duty Register',
-  '/cd-destruction': 'CD Destruction Records',
+  '/dashboard':        'Dashboard',
+  '/medicines':        'Medicines Catalogue',
+  '/inventory':        'Inventory',
+  '/sales':            'Sales History',
+  '/forecasting':      'Forecasting & Reorder',
+  '/writeoffs':        'Write-Offs',
+  '/expiry':           'Expiry Tracking',
+  '/controlled-drugs': 'Controlled Drugs',
+  '/data-import':      'Data Import & Sync',
 }
 
 const roleBadge = {

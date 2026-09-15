@@ -9,6 +9,7 @@ from app.routers import (
     medicines, batches, sales, stock, expiry, predictions, alerts, auth,
     packs, dispense, writeoffs, touchstore, reorder, risk,
     cd_register, duty_register, cd_destruction, cd_anomalies,
+    integration,
 )
 
 
@@ -61,6 +62,7 @@ app.include_router(cd_register.router,   prefix="/api/v1", **_protected)
 app.include_router(duty_register.router, prefix="/api/v1", **_protected)
 app.include_router(cd_destruction.router, prefix="/api/v1", **_protected)
 app.include_router(cd_anomalies.router,  prefix="/api/v1", **_protected)
+app.include_router(integration.router,   prefix="/api/v1", **_protected)
 
 
 @app.get("/", tags=["Health"])

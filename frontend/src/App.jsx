@@ -4,17 +4,14 @@ import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import StockManagement from './pages/StockManagement'
 import ExpiryTracking from './pages/ExpiryTracking'
-import Predictions from './pages/Predictions'
 import SalesHistory from './pages/SalesHistory'
 import Medicines from './pages/Medicines'
-import PackInventory from './pages/PackInventory'
 import WriteOffs from './pages/WriteOffs'
-import ReorderRecommendations from './pages/ReorderRecommendations'
-import CDRegister from './pages/CDRegister'
-import DutyRegister from './pages/DutyRegister'
-import CDDestruction from './pages/CDDestruction'
+import DataImport from './pages/DataImport'
+import Inventory from './pages/Inventory'
+import ForecastingReorder from './pages/ForecastingReorder'
+import ControlledDrugs from './pages/ControlledDrugs'
 
 export default function App() {
   return (
@@ -33,16 +30,22 @@ export default function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard"       element={<Dashboard />} />
             <Route path="medicines"       element={<Medicines />} />
-            <Route path="stock"           element={<StockManagement />} />
-            <Route path="packs"           element={<PackInventory />} />
-            <Route path="reorder"         element={<ReorderRecommendations />} />
+            <Route path="inventory"       element={<Inventory />} />
+            <Route path="sales"           element={<SalesHistory />} />
+            <Route path="forecasting"     element={<ForecastingReorder />} />
             <Route path="writeoffs"       element={<WriteOffs />} />
             <Route path="expiry"          element={<ExpiryTracking />} />
-            <Route path="predictions"     element={<Predictions />} />
-            <Route path="sales"           element={<SalesHistory />} />
-            <Route path="cd-register"     element={<CDRegister />} />
-            <Route path="duty-register"   element={<DutyRegister />} />
-            <Route path="cd-destruction"  element={<CDDestruction />} />
+            <Route path="controlled-drugs" element={<ControlledDrugs />} />
+            <Route path="data-import"     element={<DataImport />} />
+
+            {/* Legacy route redirects (keep old links working) */}
+            <Route path="stock"          element={<Navigate to="/inventory" replace />} />
+            <Route path="packs"          element={<Navigate to="/inventory" replace />} />
+            <Route path="predictions"    element={<Navigate to="/forecasting" replace />} />
+            <Route path="reorder"        element={<Navigate to="/forecasting" replace />} />
+            <Route path="cd-register"    element={<Navigate to="/controlled-drugs" replace />} />
+            <Route path="duty-register"  element={<Navigate to="/controlled-drugs" replace />} />
+            <Route path="cd-destruction" element={<Navigate to="/controlled-drugs" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
