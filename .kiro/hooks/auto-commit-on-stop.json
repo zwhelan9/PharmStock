@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto-commit to Git",
+      "trigger": "Stop",
+      "description": "After each agent turn, stage all changes and create a timestamped local commit if there is anything to commit. Does not push.",
+      "action": {
+        "type": "command",
+        "command": "cd \"c:/Users/zoewh/Downloads/pharmstock/PharmStock\"; if (git status --porcelain) { git add -A; git commit -m (\"auto: session changes \" + (Get-Date -Format 'yyyy-MM-dd HH:mm')) | Out-Null; Write-Output \"Committed local changes.\" } else { Write-Output \"No changes to commit.\" }",
+        "timeout": 60
+      }
+    }
+  ]
+}
